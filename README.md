@@ -31,7 +31,7 @@ var ViewPager = require('react-native-viewpager');
 
 * **`dataSource`**: this is require to provide pages data,
 * **`renderPage`**: this is require to render page view,
-* **`autoPlay`**: `true` to turn page automaticly,
+* **`autoPlay`**: `true` to turn page automatically,
 * **`isLoop`**: `true` to run in infinite scroll mode,
 * **`locked`**: `true` to disable touch scroll,
 * **`onChangePage`**: page change callback,
@@ -48,11 +48,11 @@ var ViewPager = require('react-native-viewpager');
 <ViewPager
     dataSource={this.state.dataSource}
     renderPage={this._renderPage}
-    transitionFriction={(vx) => {
+    transitionFriction={10}
+    transitionTension={(vx) => {
       // function receives the gestureState vx property
       return vx*100;
     }}
-    transitionTension={10}
 />
 ```
 

@@ -189,11 +189,11 @@ var ViewPager = React.createClass({
       nextChildIdx = 1;
     }
 
-    var friction = (this.props.transitionFriction === 'number') ?
-      this.props.transitionFriction : this.props.transactionFriction(vx);
+    var friction = (typeof this.props.transitionFriction === 'number') ?
+      this.props.transitionFriction : this.props.transactionFriction(vx) || 10;
 
-    var tension = (this.props.transitionTension === 'number') ?
-      this.props.transitionTension : this.props.transactionTension(vx);
+    var tension = (typeof this.props.transitionTension === 'number') ?
+      this.props.transitionTension : this.props.transactionTension(vx) || 50;
 
     Animated.spring(this.state.scrollValue, {
       toValue: scrollStep,
