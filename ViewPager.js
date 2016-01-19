@@ -31,19 +31,28 @@ var ViewPager = React.createClass({
     dataSource: PropTypes.instanceOf(ViewPagerDataSource).isRequired,
     renderPage: PropTypes.func.isRequired,
     onChangePage: PropTypes.func,
-    renderPageIndicator: React.PropTypes.oneOfType([
+    renderPageIndicator: PropTypes.oneOfType([
       PropTypes.func,
       PropTypes.bool
     ]),
     isLoop: PropTypes.bool,
     locked: PropTypes.bool,
     autoPlay: PropTypes.bool,
+    animationType: PropTypes.oneOf(['timing', 'spring']),
+    animationProps: PropTypes.object,
   },
 
   getDefaultProps() {
     return {
       isLoop: false,
       locked: false,
+      animationType: 'spring',
+      animationProps: [
+        {
+          friction: 10,
+          tension: 50,
+        }
+      ],
     }
   },
 
@@ -72,7 +81,7 @@ var ViewPager = React.createClass({
 
       this.props.hasTouch && this.props.hasTouch(false);
 
-      this.movePage(step);
+      this.movePage(step, gestureState);
     }
 
     this._panResponder = PanResponder.create({
@@ -159,7 +168,7 @@ var ViewPager = React.createClass({
     this.movePage(step);
   },
 
-  movePage(step) {
+  movePage(step, gs) {
     var pageCount = this.props.dataSource.getPageCount();
     var pageNumber = this.state.currentPage + step;
 
@@ -172,7 +181,7 @@ var ViewPager = React.createClass({
     var moved = pageNumber !== this.state.currentPage;
     var scrollStep = (moved ? step : 0) + this.childIndex;
 
-//    moved && this.props.onChangePage && this.props.onChangePage(pageNumber);
+    moved && this.props.onChangePage && this.props.onChangePage(pageNumber);
 
     this.state.fling = true;
 
@@ -181,7 +190,16 @@ var ViewPager = React.createClass({
       nextChildIdx = 1;
     }
 
-    Animated.spring(this.state.scrollValue, {toValue: scrollStep, friction: 10, tension: 50})
+    // Iterate through animation props and build an object
+    // If any props are functions pass them the gestureState
+    // and store their responses
+    var animationProps = Object.keys(this.props.animationProps).reduce((prev, prop) => {
+      prev[prop] =  (typeof this.props.animationProps[prop] === 'function') ?
+        this.props.animationProps[prop](gs) : this.props.animationProps[prop];
+      return prev;
+    }, { toValue: scrollStep });
+
+    Animated[this.props.animationType](this.state.scrollValue, animationProps)
       .start((event) => {
         if (event.finished) {
           this.state.fling = false;
@@ -190,7 +208,6 @@ var ViewPager = React.createClass({
           this.setState({
             currentPage: pageNumber,
           });
-          moved && this.props.onChangePage && this.props.onChangePage(pageNumber);
         }
       });
   },
