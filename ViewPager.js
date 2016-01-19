@@ -38,21 +38,21 @@ var ViewPager = React.createClass({
     isLoop: PropTypes.bool,
     locked: PropTypes.bool,
     autoPlay: PropTypes.bool,
-    animation: PropTypes.func,
+    animationType: PropTypes.oneOf(['timing', 'spring']),
+    animationProps: PropTypes.object,
   },
 
   getDefaultProps() {
     return {
       isLoop: false,
       locked: false,
-      animation: function(animate, toValue, gs) {
-        return Animated.spring(animate,
-          {
-            toValue: toValue,
-            friction: 10,
-            tension: 50,
-          })
-      },
+      animationType: 'spring',
+      animationProps: [
+        {
+          friction: 10,
+          tension: 50,
+        }
+      ],
     }
   },
 
@@ -181,8 +181,6 @@ var ViewPager = React.createClass({
     var moved = pageNumber !== this.state.currentPage;
     var scrollStep = (moved ? step : 0) + this.childIndex;
 
-    moved && this.props.onChangePage && this.props.onChangePage(pageNumber);
-
     this.state.fling = true;
 
     var nextChildIdx = 0;
@@ -190,7 +188,16 @@ var ViewPager = React.createClass({
       nextChildIdx = 1;
     }
 
-    this.props.animation(this.state.scrollValue, scrollStep, gs)
+    // Iterate through animation props and build an object
+    // If any props are functions pass them the gestureState
+    // and store their responses
+    var animationProps = Object.keys(this.props.animationProps).reduce((prev, prop) => {
+      prev[prop] =  (typeof this.props.animationProps[prop] === 'function') ?
+        this.props.animationProps[prop](gs) : this.props.animationProps[prop];
+      return prev;
+    }, { toValue: scrollStep });
+
+    Animated[this.props.animationType](this.state.scrollValue, animationProps)
       .start((event) => {
         if (event.finished) {
           this.state.fling = false;
@@ -200,9 +207,8 @@ var ViewPager = React.createClass({
             currentPage: pageNumber,
           });
         }
+        moved && this.props.onChangePage && this.props.onChangePage(pageNumber);
       });
-
-
   },
 
   renderPageIndicator(props) {
@@ -229,8 +235,7 @@ var ViewPager = React.createClass({
         render={this.props.renderPage.bind(
           null,
           dataSource.getPageData(pageIdx),
-          pageID,
-          this.state.currentPage
+          pageID
         )}
       />
     );
