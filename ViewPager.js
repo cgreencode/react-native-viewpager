@@ -1,9 +1,6 @@
 'use strict';
 
-var React = require('react');
-var { PropTypes } = React;
-
-var ReactNative = require('react-native');
+var React = require('react-native');
 var {
   Dimensions,
   Text,
@@ -11,8 +8,9 @@ var {
   TouchableOpacity,
   PanResponder,
   Animated,
+  PropTypes,
   StyleSheet,
-} = ReactNative;
+} = React;
 
 var StaticRenderer = require('react-native/Libraries/Components/StaticRenderer');
 var TimerMixin = require('react-timer-mixin');
@@ -89,6 +87,8 @@ var ViewPager = React.createClass({
     }
 
     this._panResponder = PanResponder.create({
+      onPanResponderTerminationRequest: () => false,
+      onStartShouldSetPanResponderCapture: () => true,
       // Claim responder if it's a horizontal pan
       onMoveShouldSetPanResponder: (e, gestureState) => {
         if (Math.abs(gestureState.dx) > Math.abs(gestureState.dy)) {
