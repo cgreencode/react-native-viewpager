@@ -39,7 +39,6 @@ var ViewPager = React.createClass({
     locked: PropTypes.bool,
     autoPlay: PropTypes.bool,
     animation: PropTypes.func,
-    initialPage: PropTypes.number,
   },
 
   fling: false,
@@ -122,10 +121,6 @@ var ViewPager = React.createClass({
     if (this.props.autoPlay) {
       this._startAutoPlay();
     }
-    if(this.props.initialPage){
-      var initialPage = Number(this.props.initialPage);
-      this.movePage(initialPage);
-    }
   },
 
   componentWillReceiveProps(nextProps) {
@@ -150,6 +145,7 @@ var ViewPager = React.createClass({
       }
 
       this.childIndex = Math.min(this.childIndex, constrainedPage);
+      this.fling = false;
     }
 
   },
