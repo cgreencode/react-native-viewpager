@@ -41,6 +41,7 @@ var ViewPager = React.createClass({
     locked: PropTypes.bool,
     autoPlay: PropTypes.bool,
     animation: PropTypes.func,
+    initialPage: PropTypes.number,
   },
 
   fling: false,
@@ -119,6 +120,12 @@ var ViewPager = React.createClass({
       this.childIndex = 1;
       this.state.scrollValue.setValue(1);
     }
+    if(this.props.initialPage){
+      var initialPage = Number(this.props.initialPage);
+      if (initialPage > 0) {
+        this.goToPage(initialPage, false);
+      }
+    }
   },
 
   componentDidMount() {
@@ -163,7 +170,7 @@ var ViewPager = React.createClass({
     }
   },
 
-  goToPage(pageNumber) {
+  goToPage(pageNumber, animate = true) {
 
     var pageCount = this.props.dataSource.getPageCount();
     if (pageNumber < 0 || pageNumber >= pageCount) {
@@ -172,10 +179,10 @@ var ViewPager = React.createClass({
     }
 
     var step = pageNumber - this.state.currentPage;
-    this.movePage(step);
+    this.movePage(step, null, animate);
   },
 
-  movePage(step, gs) {
+  movePage(step, gs, animate = true) {
     var pageCount = this.props.dataSource.getPageCount();
     var pageNumber = this.state.currentPage + step;
 
@@ -188,25 +195,33 @@ var ViewPager = React.createClass({
     var moved = pageNumber !== this.state.currentPage;
     var scrollStep = (moved ? step : 0) + this.childIndex;
 
-    this.fling = true;
-
     var nextChildIdx = 0;
     if (pageNumber > 0 || this.props.isLoop) {
       nextChildIdx = 1;
     }
 
-    this.props.animation(this.state.scrollValue, scrollStep, gs)
-      .start((event) => {
-        if (event.finished) {
-          this.fling = false;
-          this.childIndex = nextChildIdx;
-          this.state.scrollValue.setValue(nextChildIdx);
-          this.setState({
-            currentPage: pageNumber,
-          });
-        }
-        moved && this.props.onChangePage && this.props.onChangePage(pageNumber);
+    if (animate) {
+      this.fling = true;
+      this.props.animation(this.state.scrollValue, scrollStep, gs)
+        .start((event) => {
+          if (event.finished) {
+            this.fling = false;
+            this.childIndex = nextChildIdx;
+            this.state.scrollValue.setValue(nextChildIdx);
+            this.setState({
+              currentPage: pageNumber,
+            });
+          }
+          moved && this.props.onChangePage && this.props.onChangePage(pageNumber);
+        });
+    } else {
+      this.childIndex = nextChildIdx;
+      this.state.scrollValue.setValue(nextChildIdx);
+      this.setState({
+        currentPage: pageNumber,
       });
+    }
+
   },
 
   getCurrentPage() {
