@@ -202,7 +202,7 @@ var ViewPager = React.createClass({
       });
     };
 
-    if (animated) {
+    if (animate) {
       this.fling = true;
       this.props.animation(this.state.scrollValue, scrollStep, gs)
         .start((event) => {
@@ -235,7 +235,7 @@ var ViewPager = React.createClass({
     }
   },
 
-  _getPage(pageIdx: number, loop = false: boolean) {
+  _getPage(pageIdx: number, loop:boolean = false ) {
     var dataSource = this.props.dataSource;
     var pageID = dataSource.pageIdentities[pageIdx];
     return (
