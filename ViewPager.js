@@ -184,7 +184,7 @@ var ViewPager = React.createClass({
     var pageCount = this.props.dataSource.getPageCount();
     var pageNumber = this.state.currentPage + step;
     if (this.props.isLoop) {
-      pageNumber = (pageNumber + pageCount) % pageCount;
+      pageNumber = pageCount == 0 ? pageNumber = 0 : ((pageNumber + pageCount) % pageCount);
     } else {
       pageNumber = Math.min(Math.max(0, pageNumber), pageCount - 1);
     }
@@ -235,7 +235,7 @@ var ViewPager = React.createClass({
     }
   },
 
-  _getPage(pageIdx: number, loop:boolean) {
+  _getPage(pageIdx: number, loop:boolean = false ) {
     var dataSource = this.props.dataSource;
     var pageID = dataSource.pageIdentities[pageIdx];
     return (
